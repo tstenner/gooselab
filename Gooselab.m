@@ -49,58 +49,61 @@ goose.set.visual.rotate = 0; %-> goose.set.analysis ?!?
 if nargin == 0
 
     %% Intro
-    if 1
-        g_logo;
-        pause(1);
-        close(goose.gui.fig_logo);
-    end
+    %if 1
+        %g_logo;
+        %pause(1);
+        %close(goose.gui.fig_logo);
+    %end
 
     %% build GUI
     goose.gui.fig_main = figure('Units','normalized','Position',[0 .03 1 .92],'Menubar','None','Name',['GooseLab ',sprintf('%3.2f',goose.version.number)],'Numbertitle','Off','KeyPressFcn','g_figkeypressfcn');
 %   maximize(goose.gui.fig_main);
-    goose.gui.menu_1  = uimenu(goose.gui.fig_main,'Label','File');
-    goose.gui.menu_1a = uimenu(goose.gui.menu_1,'Label','Load Video','Callback','g_open(1)');
-    goose.gui.menu_1b = uimenu(goose.gui.menu_1,'Label','Load Image','Callback','g_open(2)');
-    goose.gui.menu_1c = uimenu(goose.gui.menu_1,'Label','Associate Stimulus','Callback','g_open(4)');
-    goose.gui.menu_1d = uimenu(goose.gui.menu_1,'Label','Open GooseLab Project','Callback','g_open(3)','Separator','on');
-    goose.gui.menu_1e = uimenu(goose.gui.menu_1,'Label','Save GooseLab Project','Callback','g_save');
-    goose.gui.menu_1x = uimenu(goose.gui.menu_1,'Label','Exit','Callback','delete(gcf)','Separator','on');
 
-    goose.gui.menu_2  = uimenu(goose.gui.fig_main,'Label','Settings');
-    goose.gui.menu_2a = uimenu(goose.gui.menu_2,'Label','Analysis Settings','Callback','g_set_analysis');
-    goose.gui.menu_2b = uimenu(goose.gui.menu_2,'Label','Visual Settings','Callback','g_set_visual');
-    goose.gui.menu_2c = uimenu(goose.gui.menu_2,'Label','Resfresh Graphics','Callback','g_set_refresh');
+% Here we define the menus on top. The format is 
+% { 'Menutitle', {'Title 1','callbackfn',seperator;
+% 'Title 2','fn2',seperator};
+% 'Menu 2 Title', { etc...
+    menu = {
+        'File', {
+            'Load Video','g_open(1)',0;
+            'Load Image','g_open(2)',0};
+        'Settings', {
+            'Analysis Settings','g_set_analysis',0;
+            'Visual Settings','g_set_visual',0;
+            'Refresh Graphics','g_set_refresh',0};
+        'Analysis', {
+            'Analyze','g_analyze_set',0;
+            'Analyze current frame','g_analyze(1)',0;
+            'Normalize','g_renorm_gui',1;
+            'Reset analysis','g_reset(0)',1};
+        'Tools', {
+            'Find LED Marker','g_getmarker(0)',0;
+            'Add Marker','g_modifymarker(1)',0;
+            'Delete Marker','g_modifymarker(2)',0;
+            'Remove LED Artifacts','remove_LEDartifact',0;
+            'Spectrum','g_spectrum',1};
+        'Play', {
+            'Play video & sound','g_play(1)',0;
+            'Toggle frames','toggle_frames',1;
+            'File Mode','g_imaq',1;
+            'Stream Mode','g_imaq',0};
+        'Export', {
+            'Single Picture','g_export(1)',0;
+            'Animated Gif','g_export(2)',0;
+            'Goose Values','g_export(3)',1};
 
-    goose.gui.menu_3  = uimenu(goose.gui.fig_main,'Label','Analysis');
-    goose.gui.menu_3a = uimenu(goose.gui.menu_3,'Label','Analyze ...','Callback','g_analyze_set');
-    goose.gui.menu_3b = uimenu(goose.gui.menu_3,'Label','Analyze current frame','Callback','g_analyze(1)');
-    goose.gui.menu_3c = uimenu(goose.gui.menu_3,'Label','Normalize','Callback','g_renorm_gui','Separator','on','Accelerator','n');
-    %goose.gui.menu_3c = uimenu(goose.gui.menu_3,'Label','Normalize ...','Callback','g_normalize_set','Separator','on');
-    goose.gui.menu_3d = uimenu(goose.gui.menu_3,'Label','Reset analysis','Callback','g_reset(1)','Separator','on');
-
-    goose.gui.menu_4  = uimenu(goose.gui.fig_main,'Label','Tools');
-    goose.gui.menu_4a = uimenu(goose.gui.menu_4,'Label','Find LED Marker','Callback','g_getmarker(0)');
-    goose.gui.menu_4b = uimenu(goose.gui.menu_4,'Label','Add Marker','Callback','g_modifymarker(1)');
-    goose.gui.menu_4c = uimenu(goose.gui.menu_4,'Label','Delete Marker','Callback','g_modifymarker(2)');
-    goose.gui.menu_4d = uimenu(goose.gui.menu_4,'Label','Remove LED Artifacts','Callback','remove_LEDartifact');
-    %    goose.gui.menu_4b = uimenu(goose.gui.menu_4,'Label','Get Marker (< V1.15)','Callback','get_marker(0)');
-    goose.gui.menu_4e = uimenu(goose.gui.menu_4,'Label','Spectrum ','Callback','g_spectrum','Separator','on');
-
-    goose.gui.menu_5  = uimenu(goose.gui.fig_main,'Label','Play');
-    goose.gui.menu_5a = uimenu(goose.gui.menu_5,'Label','Play video & sound','Callback','g_play(1)');
-    goose.gui.menu_5b = uimenu(goose.gui.menu_5,'Label','Toggle Frames','Callback','toggle_frames','Separator','on');
-    goose.gui.menu_5c = uimenu(goose.gui.menu_5,'Label','File Mode','Callback','g_imaq','Enable','off','Separator','on');
-    goose.gui.menu_5d = uimenu(goose.gui.menu_5,'Label','Stream Mode','Callback','g_imaq');
-
-    goose.gui.menu_6  = uimenu(goose.gui.fig_main,'Label','Export');
-    goose.gui.menu_6a = uimenu(goose.gui.menu_6,'Label','Single Picture','Callback','g_export(1)');
-    goose.gui.menu_6b = uimenu(goose.gui.menu_6,'Label','Animated Gif','Callback','g_export(2)');
-    goose.gui.menu_6c = uimenu(goose.gui.menu_6,'Label','Goose Values','Callback','g_export(3)','Separator','on');
-
-    goose.gui.menu_7  = uimenu(goose.gui.fig_main,'Label','Help');
-    goose.gui.menu_7a = uimenu(goose.gui.menu_7,'Label','Info','Callback','g_info');
-    goose.gui.menu_7b = uimenu(goose.gui.menu_7,'Label','About Gooselab','Callback','g_logo','Separator','on');
-
+        'Help', {
+            'Info','g_info',0;
+            'About Gooselab','g_logo',0}
+    };
+    sep = {'off','on'};
+    for i=1:length(menu)
+        submenu = uimenu(goose.gui.fig_main,'Label',menu{i,1});
+        for j=1:length(menu{i,2}(:,1))
+            entry = menu{i,2}(j,:);
+            uimenu(submenu, 'Label', entry{1}, 'Callback', entry{2}, 'Separator', sep{entry{3}+1});
+        end
+    end
 
     goose.gui.ax_sound = axes('Units','normalized','Position',[.05 .847 .9 .12],'YLim',[-1, 1],'ButtonDownFcn','g_click','FontUnits','normalized','FontSize',.13);
     goose.gui.text_sound_title = uicontrol('Units','normalized','Style','text','Position',[.25 .967 .5 .03],'String','Soundtrack','BackgroundColor',get(gcf,'Color'),'FontUnits','normalized','FontSize',.65);
