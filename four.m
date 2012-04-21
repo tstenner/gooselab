@@ -173,7 +173,7 @@ if goose.set.visual.updategraphics(4)
     legendtxt = goose.set.visual.showspecL(logical(goose.set.visual.showspec(1:3)));
 
     if goose.set.visual.showspec(4)
-        if length(find(isgoose)) > 0
+        if any(isgoose)
             mrispec_isgoose = mean(goose.analysis.rispec(:,isgoose),2);
             goose.current.plot_mrispec_ig = plot(x,mrispec_isgoose','b','LineWidth',2);
         else
@@ -183,7 +183,7 @@ if goose.set.visual.updategraphics(4)
     end
 
     if goose.set.visual.showspec(5)
-        if length(find(nogoose)) > 0
+        if any(nogoose)
             mrispec_nogoose = mean(goose.analysis.rispec(:,nogoose),2);
             goose.current.plot_mrispec_ng = plot(x,mrispec_nogoose','c','LineWidth',2);
         else
