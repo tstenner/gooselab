@@ -14,16 +14,10 @@ switch ch,
         set(goose.gui.butt_stop_analysis,'Visible','off');
 
     case 28 %left
-        goose.current.iFrame = goose.current.iFrame - 1;
-        goose.current.iFrame = max(1, goose.current.iFrame);
-        %refresh_display;
-        g_analyze(1);
+        goto_frame(goose.current.iFrame-1);
 
     case 29 %right
-        goose.current.iFrame = goose.current.iFrame + 1;
-        goose.current.iFrame = min(goose.video.nFrames, goose.current.iFrame);
-        %refresh_display;
-        g_analyze(1);
+        goto_frame(goose.current.iFrame+1);
 
     case 97 %"a"
         g_analyze_set;
