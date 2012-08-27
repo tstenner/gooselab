@@ -161,7 +161,7 @@ if nargin == 0
     goose.current.spect_limy = 0;
     goose.current.legend = [];
     goose.current.imgLenMax = 0;
-    goose.current.fft2Max = 0;
+    goose.current.fft2Max = .1;
     %Settings: visual
     goose.set.visual.imgLen = 0;
     goose.set.visual.rgb_alpha = [1 1 1];

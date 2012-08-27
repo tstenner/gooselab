@@ -45,6 +45,6 @@ goose.current.spect_limy = .0001;
 goose.current.gausswin = [];
 goose.current.rwin = [];
 goose.current.radindx = [];
-goose.current.fft2Max = 0;
+goose.current.fft2Max = 0.1;
 goose.current.detrend_gray = zeros(goose.current.imgLenMax, goose.current.imgLenMax);
 goose.current.detrend_smooth = zeros(goose.current.imgLenMax, goose.current.imgLenMax);
