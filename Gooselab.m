@@ -20,8 +20,8 @@ addpath(genpath(goosedir)); %add all subdirectories of Gooselab to Matlab path
 %savepath;
 
 global goose
-goose.version.number = 1.21;
-goose.version.datestr = '2009-07-13';
+goose.version.number = 1.25;
+goose.version.datestr = '2012-08-27';
 
 %Settings: analysis
 goose.set.analysis.gausswinsize = .5;
