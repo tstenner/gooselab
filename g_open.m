@@ -24,10 +24,11 @@ end
 
 switch filetype
     case 1, %open video file
-
+        % ignore the warning, since the warning affects only Matlab > 2009a
+        % which isn't used yet.
+        warning('off','MATLAB:audiovideo:mmreader:mmreaderToBeRemoved');
         aviObj = mmreader(fullfile(pathname, filename));
-%       [goose.video.avi_hdl, avi_inf] = dxAviOpen(fullfile(pathname, filename));
-        goose.video.nFrames = get(aviObj, 'NumberOfFrames'); %-1, since last frame cannot be opened
+        goose.video.nFrames = get(aviObj, 'NumberOfFrames')-1; %-1, since last frame cannot be opened
         goose.video.Width = get(aviObj, 'Width');
         goose.video.Height = get(aviObj, 'Height');
         goose.video.fps = get(aviObj, 'FrameRate');

@@ -13,14 +13,14 @@ end
 L = goose.set.visual.imgLen;
 Lm = goose.current.imgLenMax;
 
-%Grenzen für quadratischen Bildausschnitt
+%Grenzen fÃ¼r quadratischen Bildausschnitt
 d1a = round((1+l1)/2 - (L-1)/2);  % Start und
 d1e = round((1+l1)/2 + (L-1)/2);  %   Ende der ersten Dimension
 d2a = round((1+l2)/2 - (L-1)/2);  % Start und
 d2e = round((1+l2)/2 + (L-1)/2);  %   Ende der zweite Dimension
 goose.current.cut_img = [d1a, d1e, d2a, d2e];
 
-% Gauß-Window
+% Gauss-Window
 gws = L*goose.set.analysis.gausswinsize;
 g = exp(-(((.5:L)-L/2)/gws).^2);
 %g = hannwin(L/2);
@@ -53,6 +53,9 @@ goose.current.convwin_fft2 = g'*g;
 % Detrend Filter
 goose.current.detrendfilt = fspecial('disk', goose.set.analysis.detrendfact);
 
+
+% give FFTW more time to figure out the best strategy
+fftw('planner','patient');
 
 function hw = hannwin(winsize)
 

@@ -20,7 +20,6 @@ im = img(cut(1):cut(2), cut(3):cut(4), :);   % quadratischen zentrierten Bildaus
 goose.current.img_cut = im;
 %Graubbild
 gim = mean(im, 3);                           % und RGB-Kan�le addieren f�r Graubild
-%gim = mean(im(:,:,[1,3]), 3);  %Grau = Rot+Blau
 goose.current.img_gray = gim;
 goose.analysis.std(frame) = std(gim(:));
 

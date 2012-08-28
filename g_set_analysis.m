@@ -4,11 +4,12 @@ global goose
 goose.gui.settings.fig = figure('Units','normalized','Position',[.05 .5 .3 .4],'Menubar','None','Name','Settings','Numbertitle','Off');
 
 dx = .15; %Breite der UIs
-dy = .05; %Höhe der UIs
+dy = .05; %HÃ¶he der UIs
 dy2 = .02; %Abstand zwischen Zeilen
 dw1 = .1; %Abstand Txtfelder von links (west)
 dw2 = .5; %Abstand der Edits von links
 ds = .86; %Abstand des ersten Felds von unten (south)
+
 
 goose.gui.settings.text_winsize     = uicontrol('Style','text','Units','normalized','FontUnits','normalized','Position',[dw1 ds-(dy+dy2)*0 .5 dy],'String','Anti-Leakage Window Size:','HorizontalAlignment','left','BackgroundColor',get(gcf,'Color'));
 goose.gui.settings.edit_winsize     = uicontrol('Style','edit','Units','normalized','FontUnits','normalized','Position',[dw2 ds-(dy+dy2)*0 dx dy],'String', goose.set.analysis.gausswinsize);
