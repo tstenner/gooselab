@@ -23,26 +23,7 @@ global goose
 goose.version.number = 1.25;
 goose.version.datestr = '2012-08-27';
 
-%Settings: analysis
-goose.set.analysis.gausswinsize = .5;
-goose.set.analysis.detrend_errorlim = 4;  %error tolerance limit before new detrend image updated
-goose.set.analysis.detrendfact = 30; %40      %smoothing factor: high vals = lower detrend and slower! Choosing lower vals may remove gb frequency
-goose.set.analysis.spectbyf = 2; %correct for 2D pink noise by * f^2; fixed
-goose.set.analysis.convwinsize = 2;
-goose.set.analysis.goosepix = 12;
-goose.set.analysis.gooserange = [10 14]; %[5,10]; %
-goose.set.analysis.specttype = 1;
-goose.set.analysis.basetype = 3;
-goose.set.analysis.spectposL = {'goosepix','peak location','mean peak loc (all)','mean peak loc (is goose)','mean peak loc (no goose)'};
-goose.set.analysis.spectpos = 3;
-goose.set.analysis.fac = [1.5, 1];
-goose.set.analysis.basepolydegree = 2;
 
-goose.set.greenLED_thresh = .6;
-goose.set.redLED_thresh = 1;
-goose.set.markerNameL = {'LED Onset','LED-Offset','Goose-Onset','Goose-Offset'};
-
-goose.set.visual.rotate = 0; %-> goose.set.analysis ?!?
 
 
 
@@ -150,36 +131,52 @@ if nargin == 0
     goose.gui.edit_gamp_done = uicontrol('Units','normalized','Style','edit','Position',[.39 .55 .07 .03],'String','','FontUnits','normalized','FontSize',.4,'Enable','inactive');
     goose.gui.butt_stop_analysis = uicontrol('Units','normalized','Position',[.39 .52 .07 .025],'String','stop analysis','Callback','g_analyze(0)','Visible','off','FontUnits','normalized','FontSize',.5);
 
-    goose.current.batchmode = 0;
-    goose.current.isanalyzing = 0;
-    goose.current.isplaying = 0;
-    goose.current.istoggling = 0;
-    goose.current.isrecording = 0;
-    goose.current.iFrame = 1;
-    goose.current.jFrame = 1;
-    goose.current.nFramesDone = 0;
-    goose.current.spect_limy = 0;
-    goose.current.legend = [];
-    goose.current.imgLenMax = 0;
-    goose.current.fft2Max = .1;
+    goose.current = struct('batchmode',0,'isanalyzing',0,'isplaying',0,...
+        'istoggling',0,'isrecording',0,'iFrame',1,'jFrame',1,...
+        'nFramesDone',0,'spect_limy',0,'legend',[],'imgLenMax',0,'fft2Max',.1);
+    %Settings: analysis, process, visual
+    goose.set = struct(...
+        'analysis',struct(...
+            'gausswinsize',.5,...
+            'detrend_errorlim',4,... %error tolerance limit before new detrend image updated
+            'detrendfact',30,... %smoothing factor: high vals = lower detrend and slower! Choosing lower vals may remove gb frequency
+            'spectbyf',2,... %correct for 2D pink noise by * f^2; fixed
+            'fac',[1.5,1],...
+            'basepolydegree',2,...
+            'convwinsize',2,...
+            'goosepix',12,...
+            'gooserange',[10 14],...
+            'specttype',1,...
+            'basetype',3,...
+            'spectpos',3),...
+        'process',struct(...
+            'framerange',[1 0],...
+            'progressionmode',2,...
+            'overwrite',0),...
+        'visual',struct(...
+            'imgLen',0,...
+            'rgb_alpha',[1 1 1],...
+            'fft2_lim',60,...
+            'fft2_radalpha',2,...
+            'spect_limx',.5,...
+            'spect_limy',[],...
+            'updategraphics',[1 1 1 1],...
+            'rotate',0)); %-> goose.set.analysis ?!?
+        goose.set.analysis.spectposL = {'goosepix','peak location','mean peak loc (all)','mean peak loc (is goose)','mean peak loc (no goose)'};
+        goose.set.process.progressionmodeL = {'linear','progressive'};
+%goose.set.analysis.detrend_errorlim = 4;  %error tolerance limit before new detrend image updated
+
+    goose.set.greenLED_thresh = .6;
+    goose.set.redLED_thresh = 1;
+    goose.set.markerNameL = {'LED Onset','LED-Offset','Goose-Onset','Goose-Offset'};
+    
     %Settings: visual
-    goose.set.visual.imgLen = 0;
-    goose.set.visual.rgb_alpha = [1 1 1];
-    goose.set.visual.fft2_lim = 60;
-    goose.set.visual.fft2_radalpha = 2;
-    goose.set.visual.spect_limx = .5;
-    goose.set.visual.spect_limy = [];
-    goose.set.visual.updategraphics = [1 1 1 1];  %video, gray image, FFT2, spectogram
     goose.set.visual.showspecL = {'radial spectogram','current baseline fit','amplitude x0 indicator','spectogram for gb-frames','spectogram for no gb-frames','mean baseline fit','legend'};
     goose.set.visual.showspec = [1 0 1 0 0 0 0];
     %Analysis: options
-    goose.set.process.framerange = [1 0];
-    goose.set.process.progressionmodeL = {'linear','progressive'};
-    goose.set.process.progressionmode = 2;
-    goose.set.process.overwrite = 0;
     goose.video.nFrames = 0;
     goose.video.vidobj = [];
-    %%%
+    %%
     goose.gui.line_marker = [];
     goose.gui.text_marker = [];
 
