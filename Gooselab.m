@@ -23,21 +23,14 @@ global goose
 goose.version.number = 1.25;
 goose.version.datestr = '2012-08-27';
 
-
-
-
-
 if nargin == 0
-
-    %% Intro
-    %if 1
-        %g_logo;
-        %pause(1);
-        %close(goose.gui.fig_logo);
-    %end
+    set(0,'DefaultUicontrolFontUnits','normalized','DefaultUicontrolUnits','normalized');
+    set(0,'DefaultTextFontSize',.5);
 
     %% build GUI
-    goose.gui.fig_main = figure('Units','normalized','Position',[0 .03 1 .92],'Menubar','None','Name',['GooseLab ',sprintf('%3.2f',goose.version.number)],'Numbertitle','Off','KeyPressFcn','g_figkeypressfcn');
+    % Todo: add correct handling for multi-monitor setups
+    goose.gui.fig_main = figure('Units','normalized','Position',[0 .03 1 .92],'Menubar','None',...
+        'Name',['GooseLab ',sprintf('%3.2f',goose.version.number)],'Numbertitle','Off','KeyPressFcn','g_figkeypressfcn');
 %   maximize(goose.gui.fig_main);
 
 % Here we define the menus on top. The format is 
@@ -86,50 +79,50 @@ if nargin == 0
         end
     end
 
-    goose.gui.ax_sound = axes('Units','normalized','Position',[.05 .847 .9 .12],'YLim',[-1, 1],'ButtonDownFcn','g_click','FontUnits','normalized','FontSize',.13);
-    goose.gui.text_sound_title = uicontrol('Units','normalized','Style','text','Position',[.25 .967 .5 .03],'String','Soundtrack','BackgroundColor',get(gcf,'Color'),'FontUnits','normalized','FontSize',.65);
-    goose.gui.text_sound_xlabel = uicontrol('Units','normalized','Style','text','Position',[.96 .825 .03 .02],'String','s','BackgroundColor',get(gcf,'Color'),'FontUnits','normalized','FontSize',.8,'HorizontalAlignment','left');
-    goose.gui.text_sound = uicontrol('Units','normalized','Style','text','Position',[.05 .815 .3 .014],'BackgroundColor',get(gcf,'Color'),'HorizontalAlignment','left');
-    goose.gui.ax_gamp = axes('Units','normalized','Position',[.05 .65 .9 .12],'ButtonDownFcn','g_click','YLim',[0, .5],'FontUnits','normalized','FontSize',.13);
-    goose.gui.text_gamp_title =uicontrol('Units','normalized','Style','text','Position',[.25 .775 .5 .03],'String','Time Course of Goosebump Values','BackgroundColor',get(gcf,'Color'),'FontUnits','normalized','FontSize',.65);
-    goose.gui.text_gamp_xlabel = uicontrol('Units','normalized','Style','text','Position',[.96 .625 .03 .02],'String','s','BackgroundColor',get(gcf,'Color'),'FontUnits','normalized','FontSize',.8,'HorizontalAlignment','left');
-
-    goose.gui.ax_video = axes('Units','normalized','Position',[.05 .05 .3 .4]);
+    goose.gui.ax_sound = axes('Position',[.05 .847 .9 .12],'YLim',[-1, 1],'ButtonDownFcn','g_click','FontSize',.13);
+    title(goose.gui.ax_sound,'Soundtrack','FontSize',.8);
+    xlabel(goose.gui.ax_sound, 's');
+    goose.gui.text_sound = uicontrol('Style','text','Position',[.05 .815 .3 .014],'HorizontalAlignment','left');
+    goose.gui.ax_gamp = axes('Position',[.05 .65 .9 .12],'ButtonDownFcn','g_click','YLim',[0, .5],'FontSize',.13);
+    goose.gui.text_gamp_title = title(goose.gui.ax_gamp,'Time Course of Goosebump Values','FontSize',.65);
+    xlabel(goose.gui.ax_gamp,'s');
+    
+    goose.gui.ax_video = axes('Position',[.05 .05 .3 .4]);
     goose.current.pic = imagesc(imread('Projektlogo.jpg'),'ButtonDownFcn','g_open(1)');
-    text(50,365,'Load video...','Color',[1 1 1],'FontUnits','normalized','FontSize',.045,'ButtonDownFcn','g_open(1)');
+    text(50,365,'Load video...','Color',[1 1 1],'FontSize',.045,'ButtonDownFcn','g_open(1)');
     set(gca, 'XTick', [], 'YTick', [], 'Box', 'on','XColor',[0 0 0], 'YColor', [0 0 0],'YDir','reverse');
-    goose.gui.text_video = uicontrol('Units','normalized','Style','text','Position',[.05 .01 .35 .024],'BackgroundColor',get(gcf,'Color'),'HorizontalAlignment','left','FontUnits','normalized');
-    goose.gui.ax_video_title = uicontrol('Units','normalized','Style','text','Position',[.05 .45 .3 .03],'String','Frame of Skin Video','BackgroundColor',get(gcf,'Color'),'FontUnits','normalized','FontSize',.75);
+    goose.gui.text_video = uicontrol('Style','text','Position',[.05 .01 .35 .024],'HorizontalAlignment','left','FontUnits','normalized');
+    goose.gui.ax_video_title = title(goose.gui.ax_video,'Frame of Skin Video','FontSize',.75);
 
-    goose.gui.ax_gray = axes('Units','normalized','Position',[.44 .28 .13 .17],'FontUnits','normalized','FontSize',.1);
-    goose.gui.txt_gray_xlabel = uicontrol('Units','normalized','Style','text','Position',[.58 .25 .02 .02],'String','pix','BackgroundColor',get(gcf,'Color'),'FontUnits','normalized','FontSize',.7,'HorizontalAlignment','left');
-    goose.gui.txt_gray_ylabel = uicontrol('Units','normalized','Style','text','Position',[.415 .44 .02 .02],'String','pix','BackgroundColor',get(gcf,'Color'),'FontUnits','normalized','FontSize',.7,'HorizontalAlignment','left');
-    goose.gui.txt_gray_title = uicontrol('Units','normalized','Style','text','Position',[.46 .45 .15 .025],'String','Gray image','BackgroundColor',get(gcf,'Color'),'FontUnits','normalized','FontSize',.7,'HorizontalAlignment','left');
-    goose.gui.ax_fft2 = axes('Units','normalized','Position',[.44 .05 .13 .17],'FontUnits','normalized','FontSize',.1);
-    goose.gui.txt_fft2_xlabel = uicontrol('Units','normalized','Style','text','Position',[.58 .02 .04 .02],'String','inv.pix','BackgroundColor',get(gcf,'Color'),'FontUnits','normalized','FontSize',.7,'HorizontalAlignment','left');
-    goose.gui.txt_fft2_ylabel = uicontrol('Units','normalized','Style','text','Position',[.405 .21 .03 .02],'String','inv.pix','BackgroundColor',get(gcf,'Color'),'FontUnits','normalized','FontSize',.7,'HorizontalAlignment','left');
-    goose.gui.text_fft2_title = uicontrol('Units','normalized','Style','text','Position',[.454 .22 .15 .025],'String','Fourier Transform','BackgroundColor',get(gcf,'Color'),'FontUnits','normalized','FontSize',.7,'HorizontalAlignment','left');
-    goose.gui.text_fft2Info = uicontrol('Units','normalized','Style','text','Position',[.43 .00 .15 .025],'BackgroundColor',get(gcf,'Color'),'HorizontalAlignment','center');
-    goose.gui.ax_spec = axes('Units','normalized','Position',[.65 .05 .3 .4],'FontUnits','normalized','FontSize',.04);
-    goose.gui.txt_spec_xlabel = uicontrol('Units','normalized','Style','text','Position',[.962 .027 .04 .02],'String','inv.pix','BackgroundColor',get(gcf,'Color'),'FontUnits','normalized','FontSize',.7,'HorizontalAlignment','left');
-    goose.gui.txt_spec_ylabel = uicontrol('Units','normalized','Style','text','Position',[.61 .45 .03 .02],'String','inv.pix','BackgroundColor',get(gcf,'Color'),'FontUnits','normalized','FontSize',.7,'HorizontalAlignment','left');
-    goose.gui.text_spec_title = uicontrol('Units','normalized','Style','text','Position',[.7 .45 .3 .03],'String','Radial Integral of Fourier Transform','BackgroundColor',get(gcf,'Color'),'FontUnits','normalized','FontSize',.6,'HorizontalAlignment','left');
+    goose.gui.ax_gray = axes('Position',[.44 .28 .13 .17],'FontSize',.1);
+    xlabel(goose.gui.ax_gray,'pix');
+    ylabel(goose.gui.ax_gray,'pix');
+    goose.gui.txt_gray_title = title(goose.gui.ax_gray,'Gray image','FontSize',.7);
+    goose.gui.ax_fft2 = axes('Position',[.44 .05 .13 .17],'FontSize',.1);
+    xlabel(goose.gui.ax_fft2,'inv.pix');
+    ylabel(goose.gui.ax_fft2,'inv.pix');
+    goose.gui.text_fft2_title = title(goose.gui.ax_fft2,'Fourier Transform','FontSize',.7);
+    goose.gui.text_fft2Info = uicontrol('Style','text','Position',[.43 .00 .15 .025],'HorizontalAlignment','center');
+    goose.gui.ax_spec = axes('Position',[.65 .05 .3 .4],'FontSize',.04);
+    xlabel(goose.gui.ax_spec,'inv.pix');
+    ylabel(goose.gui.ax_spec,'inv.pix');
+    goose.gui.text_spec_title = title(goose.gui.ax_spec,'Radial Integral of Fourier Transform','FontSize',.6);
 
-    goose.gui.butt_rec = uicontrol('Units','normalized','Position',[.62 .55 .05 .03],'String','record','Callback','g_record','FontUnits','normalized','FontSize',.5,'Enable','off');
-    goose.gui.butt_play = uicontrol('Units','normalized','Position',[.70 .55 .05 .03],'String','play','Callback','g_play','FontUnits','normalized','FontSize',.5);
-    goose.gui.chbx_analyze_while_playing = uicontrol('Units','normalized','Style','checkbox','Position',[.83 .55 .13 .03],'BackgroundColor',get(gcf,'Color'),'String','on-the-fly analysis','Value',1,'FontUnits','normalized','FontSize',.6);
+    goose.gui.butt_rec = uicontrol('Position',[.62 .55 .05 .03],'String','record','Callback','g_record','FontSize',.5,'Enable','off');
+    goose.gui.butt_play = uicontrol('Position',[.70 .55 .05 .03],'String','play','Callback','g_play','FontSize',.5);
+    goose.gui.chbx_analyze_while_playing = uicontrol('Style','checkbox','Position',[.83 .55 .13 .03],'String','on-the-fly analysis','Value',1,'FontSize',.6);
 
-    goose.gui.text_pos_sec = uicontrol('Units','normalized','Style','text','Position',[.1 .581 .05 .02],'String','Time','BackgroundColor',get(gcf,'Color'),'FontUnits','normalized','FontSize',.9);
-    goose.gui.edit_pos_sec = uicontrol('Units','normalized','Style','edit','Position',[.1 .55 .05 .03],'String','','FontUnits','normalized','FontSize',.55,'Enable','inactive');
-    goose.gui.text_pos_frame = uicontrol('Units','normalized','Style','text','Position',[.18 .581 .05 .02],'String','Frame','BackgroundColor',get(gcf,'Color'),'FontUnits','normalized','FontSize',.9);
-    goose.gui.edit_pos_frame = uicontrol('Units','normalized','Style','edit','Position',[.18 .55 .05 .03],'String','','FontUnits','normalized','FontSize',.55,'Callback','goto_frame');
+    %goose.gui.text_pos_sec = uicontrol('Style','text','Position',[.1 .581 .05 .02],'String','Time','FontSize',.9);
+    goose.gui.edit_pos_sec = uicontrol(uipanel('Title','Time','Position',[.1 .55 .05 .05]),'Style','edit','Position',[0 0 1 .9],'String','','FontSize',.55,'Enable','inactive');
+    %goose.gui.text_pos_frame = uicontrol('Style','text','Position',[.18 .581 .05 .02],'String','Frame','FontSize',.9);
+    goose.gui.edit_pos_frame = uicontrol(uipanel('Title','Frame','Position',[.18 .55 .05 .05]),'Style','edit','Position',[0 0 1 .9],'String','','FontSize',.55,'Callback','goto_frame');
 
-    goose.gui.text_gamp = uicontrol('Units','normalized','Style','text','Position',[.29 .581 .07 .02],'String','Goose-Amp','BackgroundColor',get(gcf,'Color'),'FontUnits','normalized','FontSize',.9);
-    goose.gui.edit_gamp = uicontrol('Units','normalized','Style','edit','Position',[.3 .55 .05 .03],'String','','FontUnits','normalized','FontSize',.55,'Enable','inactive');
+    %goose.gui.text_gamp = uicontrol('Style','text','Position',[.29 .581 .07 .02],'String','Goose-Amp','FontSize',.9);
+    goose.gui.edit_gamp = uicontrol(uipanel('Title','Goose-Amp','Position',[.29 .55 .07 .05]),'Style','edit','Position',[0 0 1 .9],'FontSize',.55,'Enable','inactive');
 
-    goose.gui.text_gamp_done = uicontrol('Units','normalized','Style','text','Position',[.39 .581 .07 .02],'String','Analyzed','BackgroundColor',get(gcf,'Color'),'FontUnits','normalized','FontSize',.9);
-    goose.gui.edit_gamp_done = uicontrol('Units','normalized','Style','edit','Position',[.39 .55 .07 .03],'String','','FontUnits','normalized','FontSize',.4,'Enable','inactive');
-    goose.gui.butt_stop_analysis = uicontrol('Units','normalized','Position',[.39 .52 .07 .025],'String','stop analysis','Callback','g_analyze(0)','Visible','off','FontUnits','normalized','FontSize',.5);
+    %goose.gui.text_gamp_done = uicontrol('Style','text','Position',[.39 .581 .07 .02],'String','Analyzed','FontSize',.9);
+    goose.gui.edit_gamp_done = uicontrol(uipanel('Title','Analyzed','Position',[.39 .55 .07 .05]),'Style','edit','Position',[0 0 1 .9],'FontSize',.4,'Enable','inactive');
+    goose.gui.butt_stop_analysis = uicontrol('Position',[.39 .52 .07 .025],'String','stop analysis','Callback','g_analyze(0)','Visible','off','FontSize',.5);
 
     goose.current = struct('batchmode',0,'isanalyzing',0,'isplaying',0,...
         'istoggling',0,'isrecording',0,'iFrame',1,'jFrame',1,...
