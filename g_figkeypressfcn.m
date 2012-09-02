@@ -19,22 +19,22 @@ switch ch,
     case 29 %right
         goto_frame(goose.current.iFrame+1);
 
-    case 97 %"a"
+    case 'a'
         g_analyze_set;
         
-    case 99 %"c"
+    case 'c'
         g_analyze(1);
         
-    case 110 %"n"
+    case 'n'
         g_normalize_set;
         
-    case 111 %"o"
+    case 'o'
         g_open(1);
         
-    case 115 %"s"
+    case 's'
         g_save;
         
-    case 116 %"t"
+    case 't'
         i = goose.current.iFrame;
         goose.current.iFrame = goose.current.jFrame;
         goose.current.jFrame = i;
