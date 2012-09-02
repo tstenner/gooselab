@@ -1,65 +1,61 @@
 function g_open(filetype, filename, pathname)
+% g_open opens the specified file in Gooselab
+% filetype 0: guess, 1: video, 2: image, 3: project file, 4: sound file
+% filename name of the file without path
+% pathname path to the file
+
 global goose
 
 if nargin < 2
-    filterL = {{'*.avi'},{'*.*'},{'*.mat'},{'*.wav'}};
-    requestL = {'Select video file','Select stimulus file','Select GooseLab project file','Select an image file'};
-
-    [filename, pathname] = uigetfile(filterL{filetype}, requestL{filetype});
+    [filename, pathname] = uigetfile('*.*');
     if all(filename == 0) || all(pathname == 0) %Cancel
         return
     end
+    filetype = 0;
 end
 
+[~,~,ext] = fileparts([pathname filename]);
+if filetype < 3
+    if filetype==2 || any(strcmpi(ext,{'.bmp','.gif','.jpeg','.jpg','.png','.pgf'}))
+        pic = imread(fullfile(pathname, filename));
+        pic = double(pic) / double(intmax(class(pic)));
+        goose.current.img = pic;
 
-if filetype < 3 %load new video/image data
-    %reset file info
-    goose.video.nFrames = 0;
-    goose.audio.nSamples = 0;
-    goose.audio.filename = [];
-    goose.audio.pathname = [];
-    goose.video.pathname = pathname;
-    goose.video.filename = filename;
-end
+        goose.video = struct('Width',size(pic, 2), 'Height', size(pic, 1),'nFrames',1,'fps',1,'time',1,'vidobj',[]);
 
-switch filetype
-    case 1, %open video file
-        % ignore the warning, since the warning affects only Matlab > 2009a
-        % which isn't used yet.
+        if ~goose.current.batchmode %graphics
+            axes(goose.gui.ax_gamp);
+            cla;
+            hold on
+            goose.current.plot_gamp = plot(1,'ButtonDownFcn','g_click','Color',[.4 .4 1],'Marker','s','MarkerEdgeColor',[0 0 1],'MarkerSize',1,'MarkerFaceColor',[0 0 1]);
+            goose.gui.line_pos_ind_gamp = line([1, 1], get(goose.gui.ax_gamp,'ylim'), 'Visible','off'); %dummy
+
+            %reset sound plot
+            axes(goose.gui.ax_sound);
+            cla;
+        end
+    % We can't use the supported file formats from mmreader.getFileFormats,
+    % not all supported formats are in the list and not all formats in the
+    % list are supported, so we offer most common formats.
+    elseif filetype==1 || any(strcmpi(ext,{'.mkv','.avi','.mov','.mj2','.ogg','.ogv','.mp4','.mpg','.mpeg'}))
+        % ignore the warning, since mmreader's replacement VideoReader
+        % isn't available in commonly used matlab versions
         warning('off','MATLAB:audiovideo:mmreader:mmreaderToBeRemoved');
-        aviObj = mmreader(fullfile(pathname, filename));
-        goose.video.nFrames = get(aviObj, 'NumberOfFrames')-1; %-1, since last frame cannot be opened
+        try
+            aviObj = mmreader(fullfile(pathname, filename));
+        catch e
+            warndlg({'Loading video failed:',e.message});
+        end
+        goose.video.nFrames = get(aviObj, 'NumberOfFrames'); %-1, since last frame cannot be opened
         goose.video.Width = get(aviObj, 'Width');
         goose.video.Height = get(aviObj, 'Height');
         goose.video.fps = get(aviObj, 'FrameRate');
         goose.video.time = get(aviObj, 'Duration');
         goose.video.aviobj = aviObj;
 
-        l = min(goose.video.Width, goose.video.Height); %minimale Dimension
-        goose.set.visual.imgLen  = floor(l/2) * 2; %forciert gerade Zahl
-        goose.current.imgLenMax = goose.set.visual.imgLen;
-
-        g_reset(0); %reset analysis without plot
-
-        prepare_four;
+        goose.current.img = double(read(goose.video.aviobj, goose.current.iFrame))/255;
 
         if ~goose.current.batchmode %graphics
-            set(goose.gui.fig_main,'Name',['GooseLab ',sprintf('%3.2f',goose.version.number),' - ',fullfile(pathname, filename)])
-            set(goose.gui.text_video,'String',[num2str(goose.video.time),' sec, ',num2str(goose.video.nFrames), ' frames (',num2str(goose.video.Width),' x ',num2str(goose.video.Height),' at ',num2str(goose.video.fps),' fps)'],'FontUnits','normalized','FontSize',.7)
-            %plot first frame with imagesc to readjust axes
-            axes(goose.gui.ax_video);
-            pixmap = read(goose.video.aviobj, goose.current.iFrame);
-            goose.current.img = reshape(pixmap/255, [goose.video.Height, goose.video.Width, 3]);
-            goose.current.pic = imagesc(goose.current.img);
-            %axis image off;
-            %fix 1:1 pixel scaling
-            set(gca,'Units','pixel');
-            pos = get(gca,'Position');
-            set(gca,'Position',[pos(1:2) goose.video.Width goose.video.Height]);
-
-            goose.set.visual.fft2_lim = min(goose.set.visual.fft2_lim, goose.current.imgLenMax);
-
-            %dummy goose-amp plot %
             axes(goose.gui.ax_gamp);
             cla;
             hold on
@@ -78,56 +74,36 @@ switch filetype
             hold on
             set(goose.gui.ax_sound,'XLim',[1, goose.video.nFrames],'XTick',XTick,'XTickLabel',XTick / goose.video.fps)
 
-            g_analyze(goose.current.iFrame);
         end
+    end
+    
+    goose.audio.nSamples = 0;
+    goose.audio.filename = [];
+    goose.audio.pathname = [];
+    goose.video.pathname = pathname;
+    goose.video.filename = filename;
+
+    l = min(goose.video.Width, goose.video.Height); %minimal Dimension
+    goose.set.visual.imgLen = floor(l/2)*2; % imgLen should be even
+    goose.current.imgLenMax = goose.set.visual.imgLen;
+
+    g_reset(0);
+    prepare_four;
+
+    if ~goose.current.batchmode %graphics
+        goose.set.visual.fft2_lim = min(goose.set.visual.fft2_lim, goose.current.imgLenMax);
+        set(goose.gui.fig_main,'Name',['GooseLab ',sprintf('%3.2f',goose.version.number),' - ',fullfile(pathname, filename)])
+        set(goose.gui.text_video,'String',[num2str(goose.video.time),' sec, ',num2str(goose.video.nFrames), ' frames (',num2str(goose.video.Width),' x ',num2str(goose.video.Height),' at ',num2str(goose.video.fps),' fps)'],'FontUnits','normalized','FontSize',.7)
+        %plot first frame with imagesc to readjust axes
+        axes(goose.gui.ax_video);
+        goose.current.pic = imagesc(goose.current.img);
+    end
+    g_analyze(1);
+
+end
 
 
-    case 2 %open image
-
-        pic = imread(fullfile(pathname, filename));
-        if isa(pic,'uint8') %geht sicher eleganter, aber wie?
-            pic = double(pic)/255;
-        elseif isa(pic, 'uint16')
-            pic = double(pic)/65535;
-        end
-        goose.video.Width = size(pic, 2);
-        goose.video.Height = size(pic, 1);
-        goose.video.nFrames = 1;
-        goose.video.fps = 1; %dummy value
-        goose.video.time = 0; %dummy value
-        l = min(goose.video.Width, goose.video.Height); %minimale Dimension
-        goose.set.visual.imgLen = floor(l/2)*2; %forciert gerade Zahl
-        goose.current.imgLenMax = goose.set.visual.imgLen;
-
-        g_reset(0);
-        %goose.analysis.marker = [];
-
-        prepare_four;
-
-        if ~goose.current.batchmode %graphics
-            axes(goose.gui.ax_video);
-            goose.current.img = pic;
-            goose.current.pic = imagesc(pic);
-            %axis image off;
-
-            goose.set.visual.fft2_lim = min(goose.set.visual.fft2_lim, goose.current.imgLenMax);
-
-            %dummy goose-amp plot
-            axes(goose.gui.ax_gamp);
-            cla;
-            hold on
-            goose.current.plot_gamp = plot(1,'ButtonDownFcn','g_click','Color',[.4 .4 1],'Marker','s','MarkerEdgeColor',[0 0 1],'MarkerSize',1,'MarkerFaceColor',[0 0 1]);
-            goose.gui.line_pos_ind_gamp = line([1, 1], get(goose.gui.ax_gamp,'ylim'), 'Visible','off'); %dummy
-
-            %reset sound plot
-            axes(goose.gui.ax_sound);
-            cla;
-
-            g_analyze(1);
-        end
-
-
-    case 3, %open goose project file
+if filetype==3 || strcmpi(ext,'.mat') %open goose project file
         projectfile = load(fullfile(pathname, filename));
         if ~isempty(projectfile) && (any(strcmp(fieldnames(projectfile),'sources')) && any(strcmp(fieldnames(projectfile),'analysis'))) %valid file
 
@@ -135,8 +111,8 @@ switch filetype
             %video
             try
                 g_open(1, projectfile.sources.video.filename, pathname); %including analysis of current frame, which becomes overwrite some lines later on
-            catch
-                h = warndlg(['Could not open video at : ', fullfile(pathname,projectfile.sources.video.filename)],'Error loading video source');
+            catch e
+                h = warndlg({'Could not open video at : ', fullfile(pathname,projectfile.sources.video.filename),e.message},'Error loading video source');
                 waitfor(h);
                 drawnow;
                 g_open(1);
@@ -147,8 +123,8 @@ switch filetype
                 if ~(isempty(projectfile.sources.audio.filename) || isempty(projectfile.sources.audio.pathname))
                     g_open(4, projectfile.sources.audio.filename, projectfile.sources.audio.pathname)
                 end
-            catch
-                h = warndlg(['Could not open audio at source: ', fullfile(projectfile.sources.audio.pathname,projectfile.sources.audio.filename)],'Error loading audio source');
+            catch e
+                h = warndlg({'Could not open audio at source: ', fullfile(projectfile.sources.audio.pathname,projectfile.sources.audio.filename),e.message},'Error loading audio source');
                 waitfor(h);
                 drawnow;
                 g_open(4);
@@ -163,8 +139,7 @@ switch filetype
             goose.analysis.marker.name = goose.set.markerNameL; %overwrite old name convention
 
             if ~goose.current.batchmode
-                done_idx = find(goose.analysis.framedone);
-                goose.current.nFramesDone = length(done_idx);
+                goose.current.nFramesDone = sum(goose.analysis.framedone);
                 prepare_four;
                 g_analyze(1); %current frame analyzed another time in order to have g_analyze refresh all displays
                 g_plotmarker;
@@ -175,7 +150,7 @@ switch filetype
         end
 
 
-    case 4, %open audio file
+elseif filetype==4 %open audio file
         goose.audio.pathname = pathname;
         goose.audio.filename = filename;
         [goose.audio.data, goose.audio.Fs, goose.audio.bits] = wavread([pathname, filename]);
@@ -204,8 +179,4 @@ switch filetype
             ch = get(goose.gui.ax_sound,'Children');
             set(goose.gui.ax_sound,'Children',ch([3:end,1:2])); %get the fill behind
         end
-
-        %its not correct to take XLim from video data
-        %        set(gca,'XLim',[1, length(get(goose.audio.plot,'YData'))],'Xtick',get(goose.gui.ax_gamp,'XTick'), 'XTickLabels', get(goose.gui.ax_gamp,'XTickLabels'));
-
 end
