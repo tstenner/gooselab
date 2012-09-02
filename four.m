@@ -1,25 +1,25 @@
 function amp = four(img)
-global goose
-
 % four
 %
 % Fourier transform analysis of skin pictures
-% img             pixmap
+% img pixmap containing the image to analyse
+
+global goose
 
 frame = goose.current.iFrame;
 L = goose.set.visual.imgLen;
 Lm = goose.current.imgLenMax;
-%Marker (Gr�nwert)
+%Marker (green channel)
 sel = img(1:50,(end-50):end, 2); %right-upper window, green channel
 green = mean(sel(:));
 red_im = img((end-50):end,1:50,1);  %left-lower window, red marker
 red = mean(red_im(:));
-% Quadratischer Ausschnitt
-cut = goose.current.cut_img; %von prepare_four
-im = img(cut(1):cut(2), cut(3):cut(4), :);   % quadratischen zentrierten Bildausschnitt bilden
+
+cut = goose.current.cut_img; %see prepare_four
+im = img(cut(1):cut(2), cut(3):cut(4), :);   % centered square area
 goose.current.img_cut = im;
-%Graubbild
-gim = mean(im, 3);                           % und RGB-Kan�le addieren f�r Graubild
+%Gray IMage
+gim = mean(im, 3);                           % add RGB-channels for gray image
 goose.current.img_gray = gim;
 goose.analysis.std(frame) = std(gim(:));
 
@@ -39,51 +39,28 @@ if dev > goose.set.analysis.detrend_errorlim
     goose.analysis.grayimg_dev(frame) = 0;
 end
 
-% if ~any(goose.current.detrend_smooth)
-% 
-%     acc = round(goose.video.nFrames/(goose.set.analysis.detrend_errorlim+1))+1;
-%     frameL = acc:acc:goose.video.nFrames;
-%     for i = 1:length(frameL)
-%         iFrame = frameL(i);
-%         pixmap = dxAviReadMex(goose.video.avi_hdl, iFrame); %load pic
-%         img_detr = reshape(pixmap/255, [goose.video.Height, goose.video.Width, 3]);
-%         im_detr = img_detr(cut(1):cut(2), cut(3):cut(4), :);   % cut
-%         gim_detr(:,:,i) = mean(im_detr,3); %#ok<AGROW> %gray-img
-%     end
-%     gim_detr = mean(gim_detr,3);
-%     goose.current.detrend_smooth = smooth2(gim_detr, goose.set.analysis.detrendfact, 'mean');
-%     goose.current.detrend_gray = gim;
-% 
-% end
-
-
 %Detrend
-gim = gim - goose.current.detrend_smooth;                   %Subtraction of low-frequency image
+gim = gim - goose.current.detrend_smooth; %Subtraction of low-frequency image
 mgim = mean(mean(gim));             % Subtraction of mean to correct for inter-individual differences (i.e. normalization)
 sdgim = std(gim(:));
- if sdgim > 0.01                     %necessary line for black pictures not to result in error
-     gim = (gim-mgim);%./sdgim;%; %/15
- end
-
-% Reduce leakage: multiply with 2D-Gauss
-%gim = gim .* goose.current.gausswin;
+if sdgim > 0.01 %necessary line for black pictures not to result in error
+    gim = (gim-mgim);
+end
 
 % 2D- Fourier transform
-fgim = fft2(gim,Lm,Lm);                 % Fouriertransformation
-fgim = fftshift(fgim);              % Shift: Frequenz 0 in die Mitte
+fgim = fft2(gim,Lm,Lm); % Fourier transformation
+fgim = fftshift(fgim);              % Shift: frequency 0 in the middle
 fgim = abs(fgim) .^2 / (Lm/2)^2;
 fgim = conv2(fgim, goose.current.convwin_fft2, 'same'); %Smoothing FFT2 plot by convolution
-rfgim = fgim .* goose.current.rwin .^ goose.set.analysis.spectbyf; %= 2 (fixed)
+rfgim = fgim .* goose.current.rwin .^ goose.set.analysis.spectbyf;
 goose.current.fft2 = rfgim;
 
 % Mean radial spectrum
 radspec = mean(rfgim(goose.current.radindx),2)';
-%radspec = radspec/Lm^2;  %???
 
 % Get goose-amp
 goose.analysis.rispec(:,frame)= radspec;       %radial integrated spectogram
 [amp, mxidx] = max(radspec(goose.set.analysis.gooserange(1):goose.set.analysis.gooserange(2))); %max-amplitude in spectogram (gooserange)
-%amp = sum(radspec(goose.set.analysis.gooserange(1):goose.set.analysis.gooserange(2)));  %frequency range
 x0_amp = mxidx + goose.set.analysis.gooserange(1) - 1; %x-coordinate auf max-amplitude
 fitp = polyfit((goose.set.analysis.gooserange(2)+1):Lm/2, radspec((goose.set.analysis.gooserange(2)+1):Lm/2), goose.set.analysis.basepolydegree); %Parameters of polyfit right side of gooserange
 goose.analysis.framedone(frame) = 1;
@@ -128,14 +105,11 @@ if goose.set.visual.updategraphics(3)
     axes(goose.gui.ax_fft2);
     cut = floor((goose.set.visual.fft2_lim-1)/2);
     m = (Lm+1)/2;
-    %rfgim = fgim .* goose.current.rwin .^ goose.set.visual.fft2_radalpha; % = 2 (default visual setting)
     prfgim = rfgim(ceil(m-cut):floor(m+cut+1), ceil(m-cut):floor(m+cut+1));
     goose.current.fft2img = prfgim;%/Lm^3; %log(prfgim+1);
     mx = max(goose.current.fft2img(:));
-    %mx = max(mx, 2);
     goose.current.fft2Max = max(goose.current.fft2Max, mx);
-    %set(goose.gui.txt_fft2Info, 'String', ['max: ',num2str(mx,'%4.2f'),' (overall: ',num2str(goose.current.fft2Max,'%4.2f'),')']);
-    img = imagesc(goose.current.fft2img, [0, goose.current.fft2Max]);
+    img = imagesc(goose.current.fft2img, [0, goose.current.fft2Max]);  
     set(img,'ButtonDownFcn','g_showval');
     colormap('jet');
     set(gca,'dataaspectratio',[1 1 1],'FontUnits','normalized', 'XTickLabel',get(goose.gui.ax_fft2,'XTick')-(cut+1), 'YTickLabel',get(goose.gui.ax_fft2,'YTick')-(cut+1));
