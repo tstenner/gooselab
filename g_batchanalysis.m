@@ -14,28 +14,22 @@ add2log(sprintf('%s, path: %s, frame accuracy: %4.0f\n', datestr(now,0), pathnam
 
 for i = 1:length(dirL)
 
-    %try
+    try
         %open file
         filename = dirL(i).name;
         disp([datestr(now,13),' Analyzing: ',filename]);
         g_open(1, filename, pathname)
-        %g_open(3, filename, pathname)
         
         %analyze file
         for iFrame = 1:frame_acc:goose.video.nFrames  %goose.video.nFrames/nFrames
-            %pixmap = dxAviReadMex(goose.video.avi_hdl, iFrame); %load pic
             pixmap = read(goose.video.aviobj, goose.current.iFrame);
             pic = reshape(pixmap/255, [goose.video.Height, goose.video.Width, 3]);
             goose.current.iFrame = iFrame;
             four(pic);
         end
 
-        %normalize;
-        %g_normalize;
-        
         %get marker
         g_getmarker;
-        %disp(sum(goose.analysis.marker.nid == 1));
 
         %remove LED artifact
         remove_LEDartifact
@@ -49,9 +43,9 @@ for i = 1:length(dirL)
         %give feedback
         add2log(sprintf('%s %s: \tmean = %3.2f, max = %3.2f', datestr(now,13), filename, mean(goose.analysis.amp(logical(goose.analysis.framedone))), max(goose.analysis.amp)),0);
 
-%     catch
-%         add2log(sprintf('%s Error at %s !!', datestr(now,13), filename),1)
-%     end
+     catch
+         add2log(sprintf('%s Error at %s !!', datestr(now,13), filename),1)
+     end
 
 end
 
@@ -103,21 +97,6 @@ hold on
 plot(fd, goose.analysis.red(fd), 'r');
 plot(fd, goose.analysis.green(fd), 'g');
 set(gca, 'XLim',[1 n], 'YLim',[0 1]);
-
-% detrend
-% axes('Units','normalized','Position',[.05 .35 .9 .1]);
-% hold on
-% plot(fd, goose.analysis.grayimg_dev(fd));
-% nd = find(goose.analysis.newdetrend);
-% for iNd = 1:length(nd)
-%     plot([nd(iNd) nd(iNd)], [0,5], 'Color', [0 0 0]);
-% end
-% set(gca,'XLim',[1 n],'Ylim',[0 goose.set.analysis.detrend_errorlim+1]);
-
-% plot sorted gamp
-%                 axes;
-%                 plot(fd, sort(goose.analysis.amp(fd)));
-%                 set(gca,'Units','normalized','Position',[.05 .05 .55 .40],'XLim',[1 goose.video.nFrames],'YLim',[0, 30]) %
 
 % plot spectrum
 axes('Units','normalized','Position',[.05 .05 .3 .25]);

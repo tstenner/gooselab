@@ -2,7 +2,7 @@ function g_click
 global goose
 
 point1 = get(goose.gui.ax_gamp,'currentpoint');
-finalRect = rbbox;
+rbbox; % Todo: is this needed?
 point2 = get(goose.gui.ax_gamp,'currentpoint');
 point1 = point1(1,1:2);
 point2 = point2(1,1:2);

@@ -16,7 +16,6 @@ switch type,
         error('Unknown type')
 end
 window = window / sum(window(:));  % normalize window
-%data_ext = [ones(1,winwidth/2)*data(1), data, ones(1,winwidth/2)*data(end)]; %extend data by replication of border values to reduce convolution error at beginning and end
 s = size(data);
 w = winwidth/2;
 data_ext = zeros(s + winwidth);
