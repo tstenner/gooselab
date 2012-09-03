@@ -46,7 +46,7 @@ if filetype < 3
         catch e
             warndlg({'Loading video failed:',e.message});
         end
-        goose.video.nFrames = get(aviObj, 'NumberOfFrames'); %-1, since last frame cannot be opened
+        goose.video.nFrames = get(aviObj, 'NumberOfFrames')-1; %-1, since last frame cannot be opened
         goose.video.Width = get(aviObj, 'Width');
         goose.video.Height = get(aviObj, 'Height');
         goose.video.fps = get(aviObj, 'FrameRate');
