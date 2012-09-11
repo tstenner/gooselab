@@ -19,8 +19,10 @@ cut = goose.current.cut_img; %see prepare_four
 im = img(cut(1):cut(2), cut(3):cut(4), :);   % centered square area
 goose.current.img_cut = im;
 %Gray IMage
-gim = mean(im, 3);                           % add RGB-channels for gray image
+% Todo: Would rgb2gray be better?
+gim = mean(im, 3); % add RGB-channels for gray image
 goose.current.img_gray = gim;
+% Todo: computationally expensive, enable only of needed
 goose.analysis.std(frame) = std(gim(:));
 
 
@@ -41,25 +43,24 @@ end
 
 %Detrend
 gim = gim - goose.current.detrend_smooth; %Subtraction of low-frequency image
-mgim = mean(mean(gim));             % Subtraction of mean to correct for inter-individual differences (i.e. normalization)
+mgim = mean(gim(:)); % Subtraction of mean to correct for inter-individual differences (i.e. normalization)
 sdgim = std(gim(:));
 if sdgim > 0.01 %necessary line for black pictures not to result in error
     gim = (gim-mgim);
 end
 
 % 2D- Fourier transform
-fgim = fft2(gim,Lm,Lm); % Fourier transformation
-fgim = fftshift(fgim);              % Shift: frequency 0 in the middle
-fgim = abs(fgim) .^2 / (Lm/2)^2;
+% Fourier transformation (fft2), shift frequency 0 to the middle (fftshift)
+fgim = abs(fftshift(fft2(gim))).^2 / (Lm/2)^2; 
 fgim = conv2(fgim, goose.current.convwin_fft2, 'same'); %Smoothing FFT2 plot by convolution
-rfgim = fgim .* goose.current.rwin .^ goose.set.analysis.spectbyf;
-goose.current.fft2 = rfgim;
+fgim = fgim .* goose.current.rwin .^ goose.set.analysis.spectbyf;
+goose.current.fft2 = fgim;
 
 % Mean radial spectrum
-radspec = mean(rfgim(goose.current.radindx),2)';
+radspec = mean(fgim(goose.current.radindx),2)';
 
 % Get goose-amp
-goose.analysis.rispec(:,frame)= radspec;       %radial integrated spectogram
+goose.analysis.rispec(:,frame) = radspec;       %radial integrated spectogram
 [amp, mxidx] = max(radspec(goose.set.analysis.gooserange(1):goose.set.analysis.gooserange(2))); %max-amplitude in spectogram (gooserange)
 x0_amp = mxidx + goose.set.analysis.gooserange(1) - 1; %x-coordinate auf max-amplitude
 fitp = polyfit((goose.set.analysis.gooserange(2)+1):Lm/2, radspec((goose.set.analysis.gooserange(2)+1):Lm/2), goose.set.analysis.basepolydegree); %Parameters of polyfit right side of gooserange
