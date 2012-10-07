@@ -37,7 +37,7 @@ if filetype < 3
     % We can't use the supported file formats from mmreader.getFileFormats,
     % not all supported formats are in the list and not all formats in the
     % list are supported, so we offer most common formats.
-    elseif filetype==1 || any(strcmpi(ext,{'.mkv','.avi','.mov','.mj2','.ogg','.ogv','.mp4','.mpg','.mpeg'}))
+    elseif filetype==1 || any(strcmpi(ext,{'.mkv','.avi','.mov','.mj2','.ogg','.ogv','.mp4','.mpg','.mpeg', '.m4v'}))
         % ignore the warning, since mmreader's replacement VideoReader
         % isn't available in commonly used matlab versions
         warning('off','MATLAB:audiovideo:mmreader:mmreaderToBeRemoved');

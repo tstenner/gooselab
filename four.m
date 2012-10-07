@@ -106,7 +106,7 @@ if goose.set.visual.updategraphics(3)
     axes(goose.gui.ax_fft2);
     cut = floor((goose.set.visual.fft2_lim-1)/2);
     m = (Lm+1)/2;
-    prfgim = rfgim(ceil(m-cut):floor(m+cut+1), ceil(m-cut):floor(m+cut+1));
+    prfgim = fgim(ceil(m-cut):floor(m+cut+1), ceil(m-cut):floor(m+cut+1));
     goose.current.fft2img = prfgim;%/Lm^3; %log(prfgim+1);
     mx = max(goose.current.fft2img(:));
     goose.current.fft2Max = max(goose.current.fft2Max, mx);
