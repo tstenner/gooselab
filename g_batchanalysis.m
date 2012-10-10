@@ -2,6 +2,7 @@ function g_batchanalysis(pathname, frame_acc)
 global goose
 
 goose.current.batchmode = 1;
+goose.current.iFrame = 1;
 
 if ~strcmp(pathname(end),'/')
     pathname = [pathname,'/'];
