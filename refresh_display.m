@@ -13,7 +13,11 @@ if goose.video.nFrames > 1 || ~isempty(goose.video.vidobj) %video, no picture
 
     if isempty(goose.video.vidobj) %video
         % When using mmreader, reshape isn't needed anymore
-        goose.current.img = double(read(goose.video.aviobj, goose.current.iFrame))/255;
+        try
+            goose.current.img = double(read(goose.video.aviobj, goose.current.iFrame))/255;
+        catch e
+            goose.current.img = zeros(goose.video.Height,goose.video.Width,3,'double');
+        end
     end
 
     if ~all(goose.set.visual.rgb_alpha == 1)
