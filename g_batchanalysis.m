@@ -7,14 +7,14 @@ goose.current.iFrame = 1;
 if ~strcmp(pathname(end),'/')
     pathname = [pathname,'/'];
 end
-dirL = dir([pathname,'*.avi']);  %*.mat
+dirL = dir(pathname);
+
 
 %write timeinfo to log-file
 add2log(sprintf('%s, path: %s, frame accuracy: %4.0f\n', datestr(now,0), pathname, frame_acc),0);
 
 
 for i = 1:length(dirL)
-
     try
         %open file
         filename = dirL(i).name;
