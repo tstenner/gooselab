@@ -172,6 +172,9 @@ if nargin == 0
     %goose.gui.text_gamp_done = uicontrol('Style','text','Position',[.39 .581 .07 .02],'String','Analyzed','FontSize',.9);
     goose.gui.edit_gamp_done = uicontrol(uipanel('Title','Analyzed','Position',[.39 .55 .07 .05]),'Style','edit','Position',[0 0 1 .9],'FontSize',.4,'Enable','inactive');
     goose.gui.butt_stop_analysis = uicontrol('Position',[.39 .52 .07 .025],'String','stop analysis','Callback','g_analyze(0)','Visible','off','FontSize',.5);
+	
+	drawnow;
+    set(get(handle(gcf),'JavaFrame'), 'Maximized',true); % Maximize the window, should work with Matlab >R2008a, tested with Matlab <R2012b
 
 else %batch mode
 

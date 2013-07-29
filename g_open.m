@@ -38,15 +38,24 @@ if filetype < 3
     % not all supported formats are in the list and not all formats in the
     % list are supported, so we offer most common formats.
     elseif filetype==1 || any(strcmpi(ext,{'.mkv','.avi','.mov','.mj2','.ogg','.ogv','.mp4','.mpg','.mpeg', '.m4v'}))
-        % ignore the warning, since mmreader's replacement VideoReader
-        % isn't available in commonly used matlab versions
-        warning('off','MATLAB:audiovideo:mmreader:mmreaderToBeRemoved');
         try
-            aviObj = mmreader(fullfile(pathname, filename));
+            aviObj = VideoReader(fullfile(pathname, filename));
+            if isempty(aviObj.NumberOfFrames)
+                try
+                    aviObj.nFrames = 1;
+                    while true
+                        aviObj.read(aviObj.NumberOfFrames)
+                        aviObj.nFrames = aviObj.nFrames + 1;
+                    end
+                catch e
+                    disp(['This should be "The frame index requested is beyond the end of the file.":\n ' e]);
+                end
+            else
+                goose.video.nFrames = get(aviObj, 'NumberOfFrames')-1; %-1, since last frame cannot be opened
+            end
         catch e
             warndlg({'Loading video failed:',e.message});
         end
-        goose.video.nFrames = get(aviObj, 'NumberOfFrames')-1; %-1, since last frame cannot be opened
         goose.video.Width = get(aviObj, 'Width');
         goose.video.Height = get(aviObj, 'Height');
         goose.video.fps = get(aviObj, 'FrameRate');
