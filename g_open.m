@@ -44,7 +44,7 @@ if filetype < 3
                 try
                     aviObj.nFrames = 1;
                     while true
-                        aviObj.read(aviObj.NumberOfFrames)
+                        aviObj.read(aviObj.NumberOfFrames);
                         aviObj.nFrames = aviObj.nFrames + 1;
                     end
                 catch e
@@ -55,6 +55,7 @@ if filetype < 3
             end
         catch e
             warndlg({'Loading video failed:',e.message});
+			return;
         end
         goose.video.Width = get(aviObj, 'Width');
         goose.video.Height = get(aviObj, 'Height');

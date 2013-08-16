@@ -17,6 +17,7 @@ if goose.video.nFrames > 1 || ~isempty(goose.video.vidobj) %video, no picture
             goose.current.img = double(read(goose.video.aviobj, goose.current.iFrame))/255;
         catch e
             goose.current.img = zeros(goose.video.Height,goose.video.Width,3,'double');
+			disp(e);
         end
     end
 
